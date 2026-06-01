@@ -1,0 +1,47 @@
+# ============================================================
+# 部署到 GitHub Pages + 安全注入 GitHub PAT
+# ============================================================
+# ⚙️ 使用前配置（只需做一次）：
+#   1. 打开仓库 → Settings → Secrets and variables → Actions
+#   2. 点 "New repository secret"
+#   3. Name: GH_PAT
+#   4. Secret: 粘贴你的 Fine-grained PAT
+#   5. 仓库 → Settings → Pages → Source: 选 "GitHub Actions"
+# ============================================================
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# 权限：允许写入 Pages 和内容
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Inject GitHub PAT
+        run: |
+          sed -i "s@__GITHUB_PAT__@${{ secrets.GH_PAT }}@g" script.js
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

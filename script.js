@@ -93,7 +93,9 @@ const CONFIG = {
 };
 
 // ---- 基础路径 ----
-const RAW_BASE = `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/_data`;
+// 读取：用 jsdelivr CDN（国内可访问，比 raw.githubusercontent.com 快）
+// 写入：用 GitHub Contents API（需要配置 PAT）
+const RAW_BASE = `https://cdn.jsdelivr.net/gh/${CONFIG.owner}/${CONFIG.repo}@${CONFIG.branch}/_data`;
 const API_BASE = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/_data`;
 
 // ---- 工具函数 ----
