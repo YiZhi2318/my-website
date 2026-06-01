@@ -66,37 +66,26 @@ console.log('%c 廖泰扬 | 个人主页 ',
   'background: #1a3a5c; color: #e8913a; font-size: 20px; font-weight: bold; padding: 12px 24px; border-radius: 8px;');
 
 // ======================================================================
-// 📅 签到 & 💬 留言板 (数据存储在 GitHub 仓库)
+// 📅 签到 & 💬 留言板 (数据存储在 Gitee 码云)
 // ======================================================================
 //
-// ⚙️ 使用前配置（替换下方引号内的内容）：
-//   1. 在 GitHub 上创建一个仓库（例如 lty-homepage），把本代码推上去
-//   2. 启用 GitHub Pages：Settings → Pages → Branch: main → / (root)
-//   3. 创建 Fine-grained PAT：
-//      GitHub Settings → Developer settings → Personal access tokens
-//      → Fine-grained tokens → Generate new token
-//      - Repository access: Only select repositories → 选你的仓库
-//      - Permissions: Contents → Read and write
-//   4. 将生成的 token 和仓库信息填入下方 CONFIG
+// ⚙️ 使用前需配置 Gitee Private Token（仅写入需要）：
+//   1. 打开 https://gitee.com/profile/personal_access_tokens
+//   2. 点「生成新令牌」→ 填写描述 → 全选权限 → 生成
+//   3. 复制 token 替换下方 `__GITEE_TOKEN__`
 // ======================================================================
 
-// ⚠️ 初次使用需要配置！
-// 从 Supabase 迁移后，需要创建 Fine-grained PAT 才能写入数据
-// 目前先用仓库中的 token（内嵌在 remote URL 里），稍后建议换成专用的 Fine-grained PAT
+// ⚠️ 请把 __GITEE_TOKEN__ 换成你的 Gitee 私人令牌！
+//    如果还没创建，先留空也能读数据，但不能写（签到和留言不可用）
 const CONFIG = {
-  owner: 'YiZhi2318',             // GitHub 用户名
-  repo: 'my-website',             // 仓库名
-  branch: 'main',                 // 分支名
-  // ⚠️ 写入 GitHub 需要 Fine-grained PAT，部署时会自动替换下面的占位符
-  //    如果要在本地测试，手动把 __GITHUB_PAT__ 换成你的 PAT
-  token: '__GITHUB_PAT__',
+  owner: 'Lty239583',            // Gitee 用户名
+  repo: 'my-website',            // 仓库名
+  branch: 'master',              // 分支名
+  token: '__GITEE_TOKEN__',      // Gitee 私人令牌（用来写入数据）
 };
 
-// ---- 基础路径 ----
-// 读取：用 jsdelivr CDN（国内可访问，比 raw.githubusercontent.com 快）
-// 写入：用 GitHub Contents API（需要配置 PAT）
-const RAW_BASE = `https://cdn.jsdelivr.net/gh/${CONFIG.owner}/${CONFIG.repo}@${CONFIG.branch}/_data`;
-const API_BASE = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/_data`;
+// ---- Gitee API 基础路径 ----
+const GITEE_API = `https://gitee.com/api/v5/repos/${CONFIG.owner}/${CONFIG.repo}/contents/_data`;
 
 // ---- 工具函数 ----
 function todayStr() {
@@ -114,12 +103,15 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-// UTF-8 安全的 base64 编码（btoa 默认不支持中文）
+// UTF-8 安全的 base64
 function utf8ToBase64(str) {
   return btoa(unescape(encodeURIComponent(str)));
 }
+function base64ToUtf8(str) {
+  return decodeURIComponent(escape(atob(str)));
+}
 
-// ---- 带超时的 fetch（防止网络不通时按钮卡死） ----
+// ---- 带超时的 fetch ----
 async function fetchWithTimeout(url, options = {}, timeoutMs = 10000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -131,23 +123,27 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 10000) {
   }
 }
 
-// ---- 检查 PAT 是否已配置 ----
-function checkPat() {
-  if (!CONFIG.token || CONFIG.token === '__GITHUB_PAT__') {
-    throw new Error('请先配置 GitHub Token：\n1. 创建 Fine-grained PAT\n2. 添加到仓库 Secrets (GH_PAT)\n3. 通过 Actions 部署');
+// ---- 检查 Token ----
+function checkToken() {
+  if (!CONFIG.token || CONFIG.token === '__GITEE_TOKEN__') {
+    throw new Error('请先配置 Gitee Token\n创建地址：https://gitee.com/profile/personal_access_tokens');
   }
 }
 
-// ---- GitHub 数据读取 ----
+// ---- Gitee 数据读取（API，base64 解码）----
 async function readJSON(filename) {
   try {
-    const url = `${RAW_BASE}/${filename}?t=${Date.now()}`;
+    const url = `${GITEE_API}/${filename}?ref=${CONFIG.branch}&t=${Date.now()}`;
     const res = await fetchWithTimeout(url, {}, 8000);
     if (!res.ok) return [];
-    return await res.json();
+    const data = await res.json();
+    if (data.type === 'file' && data.content) {
+      return JSON.parse(base64ToUtf8(data.content));
+    }
+    return [];
   } catch (e) {
     if (e.name === 'AbortError') {
-      console.warn('读取超时（网络不通）');
+      console.warn('读取超时');
     } else {
       console.error('读取失败:', e);
     }
@@ -155,23 +151,20 @@ async function readJSON(filename) {
   }
 }
 
-// ---- GitHub 数据写入（Contents API）----
+// ---- Gitee 数据写入（Contents API）----
 async function writeJSON(filename, updater) {
-  checkPat(); // PAT 未配置时直接抛错，不卡死
+  checkToken();
 
-  // 1. 获取当前文件 SHA
+  // 1. 读取当前文件信息（获取 SHA）
   let sha;
   try {
-    const metaRes = await fetchWithTimeout(`${API_BASE}/${filename}`, {
-      headers: { 'Authorization': `Bearer ${CONFIG.token}` },
-    }, 10000);
+    const metaRes = await fetchWithTimeout(`${GITEE_API}/${filename}?ref=${CONFIG.branch}&access_token=${CONFIG.token}`, {}, 10000);
     if (metaRes.ok) {
       const meta = await metaRes.json();
       sha = meta.sha;
     }
   } catch (e) {
-    if (e.name === 'AbortError') throw new Error('连接 GitHub 超时（API 不通）');
-    /* 文件不存在则创建新文件 */
+    if (e.name === 'AbortError') throw new Error('连接 Gitee 超时');
   }
 
   // 2. 读取现有数据
@@ -180,24 +173,21 @@ async function writeJSON(filename, updater) {
     data = await readJSON(filename);
   }
 
-  // 3. 调用 updater 函数修改数据
+  // 3. 合并数据
   const newData = await updater(data);
 
-  // 4. 写回 GitHub
+  // 4. 写回 Gitee
   const content = utf8ToBase64(JSON.stringify(newData, null, 2));
   const body = {
-    message: `update ${filename}`,
     content: content,
+    message: `update ${filename}`,
     branch: CONFIG.branch,
   };
   if (sha) body.sha = sha;
 
-  const res = await fetchWithTimeout(`${API_BASE}/${filename}`, {
-    method: 'PUT',
-    headers: {
-      'Authorization': `Bearer ${CONFIG.token}`,
-      'Content-Type': 'application/json',
-    },
+  const res = await fetchWithTimeout(`${GITEE_API}/${filename}?access_token=${CONFIG.token}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   }, 10000);
 
