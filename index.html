@@ -16,6 +16,8 @@
         <li><a href="#about">关于</a></li>
         <li><a href="#projects">项目</a></li>
         <li><a href="#skills">技能</a></li>
+        <li><a href="#checkin">签到</a></li>
+        <li><a href="#guestbook">留言</a></li>
         <li><a href="#contact">联系</a></li>
       </ul>
       <div class="hamburger" onclick="toggleMenu()">
@@ -141,6 +143,36 @@
     </div>
   </section>
 
+  <!-- ===== 每日签到 ===== -->
+  <section id="checkin">
+    <div class="container">
+      <h2 class="section-title">📅 每日签到</h2>
+      <div class="checkin-box">
+        <div class="checkin-form">
+          <input type="text" id="checkinName" placeholder="你的昵称" maxlength="20">
+          <button class="btn btn-primary" onclick="doCheckin()">✅ 签到</button>
+        </div>
+        <div id="checkinMsg" class="checkin-msg"></div>
+        <div id="checkinList" class="checkin-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 留言板 ===== -->
+  <section id="guestbook">
+    <div class="container">
+      <h2 class="section-title">💬 留言板</h2>
+      <div class="guestbook-box">
+        <div class="guestbook-form">
+          <input type="text" id="msgName" placeholder="你的昵称" maxlength="20">
+          <textarea id="msgContent" placeholder="说点什么..." rows="3" maxlength="500"></textarea>
+          <button class="btn btn-primary" onclick="postMessage()">📝 发布留言</button>
+        </div>
+        <div id="guestbookList" class="guestbook-list"></div>
+      </div>
+    </div>
+  </section>
+
   <!-- 联系 -->
   <section id="contact">
     <div class="container">
@@ -191,6 +223,7 @@
     <div class="project-tags" style="margin-top:1rem"><span>I2C</span><span>MPU6050</span><span>HAL库</span><span>数据采集</span></div>
   </div></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="script.js"></script>
 </body>
 </html>
