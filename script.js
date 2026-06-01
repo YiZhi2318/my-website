@@ -186,7 +186,7 @@ async function writeJSON(filename, updater) {
   if (sha) body.sha = sha;
 
   const res = await fetchWithTimeout(`${GITEE_API}/${filename}?access_token=${CONFIG.token}`, {
-    method: 'POST',
+    method: sha ? 'PUT' : 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   }, 10000);
