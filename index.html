@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>廖泰扬 - 个人主页</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- 导航栏 -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <div class="logo">LTY</div>
+      <ul class="nav-links">
+        <li><a href="#hero" class="active">首页</a></li>
+        <li><a href="#about">关于</a></li>
+        <li><a href="#projects">项目</a></li>
+        <li><a href="#skills">技能</a></li>
+        <li><a href="#contact">联系</a></li>
+      </ul>
+      <div class="hamburger" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 首页大屏 -->
+  <section id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <div class="hero-avatar">
+        <div class="avatar-ring"></div>
+        <div class="avatar-inner">LT</div>
+      </div>
+      <h1>廖泰扬</h1>
+      <p class="hero-subtitle">自动化专业 · 嵌入式开发 · 全栈学习者</p>
+      <p class="hero-desc">桂林理工大学 | 热爱技术，持续探索</p>
+      <div class="hero-btns">
+        <a href="#projects" class="btn btn-primary">查看项目</a>
+        <a href="#contact" class="btn btn-outline">联系我</a>
+      </div>
+    </div>
+    <div class="scroll-indicator">
+      <span>向下滚动</span>
+      <div class="scroll-arrow"></div>
+    </div>
+  </section>
+
+  <!-- 关于我 -->
+  <section id="about">
+    <div class="container">
+      <h2 class="section-title">关于我</h2>
+      <div class="about-grid">
+        <div class="about-card">
+          <div class="about-icon">🎓</div>
+          <h3>教育背景</h3>
+          <p>桂林理工大学 · 自动化专业<br>本科 · 22-2班</p>
+        </div>
+        <div class="about-card">
+          <div class="about-icon">💡</div>
+          <h3>研究兴趣</h3>
+          <p>嵌入式系统 · 大语言模型应用<br>代码生成 · 性能优化</p>
+        </div>
+        <div class="about-card">
+          <div class="about-icon">🏆</div>
+          <h3>毕业设计</h3>
+          <p>基于大语言模型的嵌入式控制代码生成与性能优化研究</p>
+        </div>
+        <div class="about-card">
+          <div class="about-icon">🔧</div>
+          <h3>技术栈</h3>
+          <p>STM32 · C/C++ · Python<br>HTML/CSS/JS · Keil MDK</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 项目展示 -->
+  <section id="projects">
+    <div class="container">
+      <h2 class="section-title">项目</h2>
+      <div class="projects-grid">
+        <div class="project-card" onclick="openModal('modal1')">
+          <div class="project-img" style="background: linear-gradient(135deg, #1a3a5c, #2c6fbb);">
+            <span class="project-icon">🤖</span>
+          </div>
+          <div class="project-info">
+            <h3>LLM嵌入式代码生成研究</h3>
+            <p>基于DeepSeekV4-Flash生成STM32控制代码，优化Prompt策略</p>
+            <div class="project-tags">
+              <span>STM32</span><span>LLM</span><span>C</span>
+            </div>
+          </div>
+        </div>
+        <div class="project-card" onclick="openModal('modal2')">
+          <div class="project-img" style="background: linear-gradient(135deg, #e8913a, #f0c27a);">
+            <span class="project-icon">🚗</span>
+          </div>
+          <div class="project-info">
+            <h3>红外循迹小车</h3>
+            <p>基于STM32的两点红外循迹控制系统</p>
+            <div class="project-tags">
+              <span>嵌入式</span><span>PWM</span><span>传感器</span>
+            </div>
+          </div>
+        </div>
+        <div class="project-card" onclick="openModal('modal3')">
+          <div class="project-img" style="background: linear-gradient(135deg, #38a169, #68d391);">
+            <span class="project-icon">📊</span>
+          </div>
+          <div class="project-info">
+            <h3>MPU6050数据采集</h3>
+            <p>传感器数据采集与串口通信实验</p>
+            <div class="project-tags">
+              <span>I2C</span><span>传感器</span><span>HAL库</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 技能 -->
+  <section id="skills">
+    <div class="container">
+      <h2 class="section-title">技能</h2>
+      <div class="skills-content">
+        <div class="skill-group">
+          <h3>嵌入式开发</h3>
+          <div class="skill-bar"><span class="skill-label">STM32 / HAL库</span><div class="bar"><div class="fill" style="width:90%"></div></div></div>
+          <div class="skill-bar"><span class="skill-label">C / C++</span><div class="bar"><div class="fill" style="width:85%"></div></div></div>
+          <div class="skill-bar"><span class="skill-label">Keil MDK / CubeMX</span><div class="bar"><div class="fill" style="width:80%"></div></div></div>
+        </div>
+        <div class="skill-group">
+          <h3>软件与 Web</h3>
+          <div class="skill-bar"><span class="skill-label">Python</span><div class="bar"><div class="fill" style="width:75%"></div></div></div>
+          <div class="skill-bar"><span class="skill-label">HTML / CSS / JS</span><div class="bar"><div class="fill" style="width:70%"></div></div></div>
+          <div class="skill-bar"><span class="skill-label">Prompt Engineering</span><div class="bar"><div class="fill" style="width:85%"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 联系 -->
+  <section id="contact">
+    <div class="container">
+      <h2 class="section-title">联系我</h2>
+      <div class="contact-content">
+        <p class="contact-text">如果你对我的项目感兴趣，欢迎联系交流！</p>
+        <div class="contact-links">
+          <a href="mailto:liaotaiyang@example.com" class="contact-item">
+            <span class="ci-icon">✉️</span>
+            <span>Email</span>
+          </a>
+          <a href="#" class="contact-item">
+            <span class="ci-icon">💬</span>
+            <span>微信</span>
+          </a>
+          <a href="https://github.com" target="_blank" class="contact-item">
+            <span class="ci-icon">🐙</span>
+            <span>GitHub</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 页脚 -->
+  <footer>
+    <p>&copy; 2026 廖泰扬 · Built with ❤️</p>
+  </footer>
+
+  <!-- 项目弹窗 -->
+  <div id="modal1" class="modal"><div class="modal-content">
+    <span class="close" onclick="closeModal('modal1')">&times;</span>
+    <h2>LLM嵌入式代码生成研究</h2>
+    <p class="modal-desc">本科毕业设计项目。以STM32F103C8T6为平台，研究DeepSeekV4-Flash大语言模型在嵌入式控制代码生成中的应用。通过设计基础型、约束型、结构化三类Prompt策略，系统对比了代码生成质量。</p>
+    <p class="modal-desc"><strong>成果：</strong>代码长度减少24.3%，稳定运行率提升至98.3%。</p>
+    <div class="project-tags" style="margin-top:1rem"><span>STM32</span><span>DeepSeekV4</span><span>Prompt工程</span><span>性能优化</span></div>
+  </div></div>
+  <div id="modal2" class="modal"><div class="modal-content">
+    <span class="close" onclick="closeModal('modal2')">&times;</span>
+    <h2>红外循迹小车</h2>
+    <p class="modal-desc">基于STM32F103C8T6的两点红外循迹小车控制系统。通过两个TCRT5000红外传感器检测黑线，L298N驱动直流电机，实现自动循迹功能。采用状态机控制策略优化转向逻辑。</p>
+    <div class="project-tags" style="margin-top:1rem"><span>嵌入式</span><span>PWM</span><span>L298N</span><span>状态机</span></div>
+  </div></div>
+  <div id="modal3" class="modal"><div class="modal-content">
+    <span class="close" onclick="closeModal('modal3')">&times;</span>
+    <h2>MPU6050数据采集</h2>
+    <p class="modal-desc">基于I2C接口的MPU6050六轴姿态传感器数据采集系统。完成了传感器初始化、寄存器配置、加速度/角速度读取和串口打印等功能。</p>
+    <div class="project-tags" style="margin-top:1rem"><span>I2C</span><span>MPU6050</span><span>HAL库</span><span>数据采集</span></div>
+  </div></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
