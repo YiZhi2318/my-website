@@ -268,8 +268,7 @@ async function postMessage() {
 
     document.getElementById('msgName').value = '';
     document.getElementById('msgContent').value = '';
-    refreshMessages();
-    alert('留言发布成功 ✅');
+    await refreshMessages();
   } catch(e) {
     alert('发布失败，请检查网络');
   } finally {
