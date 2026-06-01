@@ -117,36 +117,62 @@ function utf8ToBase64(str) {
   return btoa(unescape(encodeURIComponent(str)));
 }
 
+// ---- 带超时的 fetch（防止网络不通时按钮卡死） ----
+async function fetchWithTimeout(url, options = {}, timeoutMs = 10000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    return res;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// ---- 检查 PAT 是否已配置 ----
+function checkPat() {
+  if (!CONFIG.token || CONFIG.token === '__GITHUB_PAT__') {
+    throw new Error('请先配置 GitHub Token：\n1. 创建 Fine-grained PAT\n2. 添加到仓库 Secrets (GH_PAT)\n3. 通过 Actions 部署');
+  }
+}
+
 // ---- GitHub 数据读取 ----
 async function readJSON(filename) {
   try {
-    // ?t= 参数防 CDN 缓存
     const url = `${RAW_BASE}/${filename}?t=${Date.now()}`;
-    const res = await fetch(url);
+    const res = await fetchWithTimeout(url, {}, 8000);
     if (!res.ok) return [];
     return await res.json();
   } catch (e) {
-    console.error('读取失败:', e);
+    if (e.name === 'AbortError') {
+      console.warn('读取超时（网络不通）');
+    } else {
+      console.error('读取失败:', e);
+    }
     return [];
   }
 }
 
 // ---- GitHub 数据写入（Contents API）----
-// updater 是一个函数：(当前数据) => 新数据
 async function writeJSON(filename, updater) {
-  // 1. 获取当前文件 SHA（用于并发控制）
+  checkPat(); // PAT 未配置时直接抛错，不卡死
+
+  // 1. 获取当前文件 SHA
   let sha;
   try {
-    const metaRes = await fetch(`${API_BASE}/${filename}`, {
+    const metaRes = await fetchWithTimeout(`${API_BASE}/${filename}`, {
       headers: { 'Authorization': `Bearer ${CONFIG.token}` },
-    });
+    }, 10000);
     if (metaRes.ok) {
       const meta = await metaRes.json();
       sha = meta.sha;
     }
-  } catch (e) { /* 文件不存在则创建新文件 */ }
+  } catch (e) {
+    if (e.name === 'AbortError') throw new Error('连接 GitHub 超时（API 不通）');
+    /* 文件不存在则创建新文件 */
+  }
 
-  // 2. 如果文件已存在，读取现有数据
+  // 2. 读取现有数据
   let data = [];
   if (sha) {
     data = await readJSON(filename);
@@ -162,20 +188,20 @@ async function writeJSON(filename, updater) {
     content: content,
     branch: CONFIG.branch,
   };
-  if (sha) body.sha = sha; // 有 SHA=更新文件，无 SHA=新建文件
+  if (sha) body.sha = sha;
 
-  const res = await fetch(`${API_BASE}/${filename}`, {
+  const res = await fetchWithTimeout(`${API_BASE}/${filename}`, {
     method: 'PUT',
     headers: {
       'Authorization': `Bearer ${CONFIG.token}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(body),
-  });
+  }, 10000);
 
   if (!res.ok) {
     const err = await res.json();
-    throw new Error(`${err.message}`);
+    throw new Error(`写入失败: ${err.message}`);
   }
 
   return newData;
