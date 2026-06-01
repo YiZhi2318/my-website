@@ -81,7 +81,7 @@ const CONFIG = {
   owner: 'Lty239583',            // Gitee 用户名
   repo: 'my-website',            // 仓库名
   branch: 'master',              // 分支名
-  token: '__GITEE_TOKEN__',      // Gitee 私人令牌（用来写入数据）
+  token: 'b6e4275978248a17b88cc91c473e68fa',  // Gitee 私人令牌（用来写入数据）
 };
 
 // ---- Gitee API 基础路径 ----
